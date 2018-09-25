@@ -1,13 +1,8 @@
+extern crate pg_example;
 extern crate postgres;
 extern crate postgres_range;
-extern crate pg_example;
 
-
-use pg_example::{
-	db, 
-	errors::MyError,
-	log::create_logger
-};
+use pg_example::{db, errors::MyError, log::create_logger};
 
 fn main() -> Result<(), MyError> {
     let logger = create_logger();

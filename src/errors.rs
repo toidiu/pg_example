@@ -18,7 +18,7 @@ pub enum MeetingError {
 pub enum MyError {
     DBError(DBError),
     MeetingError(MeetingError),
-    ValueError
+    ValueError,
 }
 
 impl fmt::Display for MyError {
@@ -26,7 +26,7 @@ impl fmt::Display for MyError {
         match self {
             &MyError::DBError(ref err) => write!(f, "DB Error: {:?}", err),
             &MyError::MeetingError(ref err) => write!(f, "Meeting Error: {:?}", err),
-            &MyError::ValueError => write!(f, "Value Error")
+            &MyError::ValueError => write!(f, "Value Error"),
         }
     }
 }

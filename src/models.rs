@@ -1,6 +1,6 @@
 use chrono::prelude::*;
 use postgres::{
-	error::EXCLUSION_VIOLATION,
+    error::EXCLUSION_VIOLATION,
     rows::{Row, Rows},
     transaction::Transaction,
 };
@@ -9,8 +9,6 @@ use uuid::Uuid;
 
 use db::TSTZRange;
 use errors::{DBError, MeetingError, MyError};
-
-
 
 #[derive(Debug, Clone)]
 pub struct User {
@@ -21,7 +19,7 @@ pub struct User {
     pub username: String,
 }
 impl User {
-	/// 'add_user' features a functional-style implementation
+    /// 'add_user' features a functional-style implementation
     pub fn add_user(first_name: String,
                     last_name: String,
                     username: String,
@@ -47,7 +45,7 @@ impl User {
               rows.into_iter()
                   .next()
                   .map(|row: Row| {
-							// example of referencing row elements by index 
+                           // example of referencing row elements by index
                            let user = User { id: row.get(0),
                                              ext_id: row.get(1),
                                              first_name: row.get(2),
@@ -64,9 +62,8 @@ impl User {
           })
     }
 
-	pub fn get_users(logger: &Logger, tx: &Transaction)
-					  -> Result<Vec<User>, MyError> {
-		let stmt = "
+    pub fn get_users(logger: &Logger, tx: &Transaction) -> Result<Vec<User>, MyError> {
+        let stmt = "
 		SELECT users.id, ext_id, first_name, last_name, username
 		  FROM testing.users;";
 
@@ -77,24 +74,23 @@ impl User {
               MyError::DBError(DBError::PGError(err))
           })
           .and_then(|rows: Rows| {
-		       if rows.is_empty() {
-			       error!(logger, "Error querying users from db: \
+              if rows.is_empty() {
+                  error!(logger, "Error querying users from db: \
 						  No record returned."; "step"=>"get_users");
- 				   return Err(MyError::DBError(DBError::NoRecord))
-			   }
+                  return Err(MyError::DBError(DBError::NoRecord));
+              }
 
-			   let users = rows.into_iter()
- 							   .map(|row: Row|
-									User{id: row.get(0),
-										ext_id: row.get(1),
-										first_name: row.get(2),
-										last_name: row.get(3),
-										username: row.get(4)})
-							   .collect::<Vec<User>>();
+              let users = rows.into_iter()
+                              .map(|row: Row| User { id: row.get(0),
+                                                     ext_id: row.get(1),
+                                                     first_name: row.get(2),
+                                                     last_name: row.get(3),
+                                                     username: row.get(4), })
+                              .collect::<Vec<User>>();
 
-			   Ok(users)
+              Ok(users)
           })
-	}
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -104,7 +100,7 @@ pub struct Building {
     pub name: String,
 }
 impl Building {
-	/// add_building features a procedural-style implementation
+    /// add_building features a procedural-style implementation
     pub fn add_building(name: String,
                         logger: &Logger,
                         tx: &Transaction)
@@ -116,34 +112,32 @@ impl Building {
 				  testing.building.ext_id,
 				  testing.building.name;";
 
-		let result = tx.query(stmt, &[&name])
-						.map_err(|err| {
-							error!(logger, "Failed to add building: DB Error.";
+        let result = tx.query(stmt, &[&name]).map_err(|err| {
+            error!(logger, "Failed to add building: DB Error.";
 									"step"=>"add_building", "err"=>err.to_string());
-							MyError::DBError(DBError::PGError(err))
-						})?;
+            MyError::DBError(DBError::PGError(err))
+        })?;
 
-		if result.is_empty() {
-			error!(logger, "Error adding building to db: No record returned.";
+        if result.is_empty() {
+            error!(logger, "Error adding building to db: No record returned.";
 				"step"=>"add_building");
-			return Err(MyError::DBError(DBError::NoRecord))
-		}
-        
-		let row: Row = result.iter().next().unwrap();
+            return Err(MyError::DBError(DBError::NoRecord));
+        }
 
-		// example of referencing row elements by name
-		let bldg = Building{id: row.get("id"),
-							ext_id: row.get("ext_id"),
-							name: row.get("name")};
+        let row: Row = result.iter().next().unwrap();
 
-		info!(logger, "Added building: {}", bldg.name);
+        // example of referencing row elements by name
+        let bldg = Building { id: row.get("id"),
+                              ext_id: row.get("ext_id"),
+                              name: row.get("name"), };
 
-		Ok(bldg)		
+        info!(logger, "Added building: {}", bldg.name);
+
+        Ok(bldg)
     }
-	
-	pub fn get_buildings(logger: &Logger, tx: &Transaction)
-					  -> Result<Vec<Building>, MyError> {
-		let stmt = "
+
+    pub fn get_buildings(logger: &Logger, tx: &Transaction) -> Result<Vec<Building>, MyError> {
+        let stmt = "
 		SELECT id, ext_id, name
 		  FROM testing.building;";
 
@@ -154,23 +148,21 @@ impl Building {
               MyError::DBError(DBError::PGError(err))
           })
           .and_then(|rows: Rows| {
-		       if rows.is_empty() {
-			       error!(logger, "Error querying buildings from db: \
+              if rows.is_empty() {
+                  error!(logger, "Error querying buildings from db: \
 						  No record returned."; "step"=>"get_buildings");
- 				   return Err(MyError::DBError(DBError::NoRecord))
-			   }
+                  return Err(MyError::DBError(DBError::NoRecord));
+              }
 
-			   let bldgs = rows.into_iter()
- 							   .map(|row: Row|
-									Building{
-										id: row.get(0),
-										ext_id: row.get(1),
-										name: row.get(2)})
-							   .collect::<Vec<Building>>();
+              let bldgs = rows.into_iter()
+                              .map(|row: Row| Building { id: row.get(0),
+                                                         ext_id: row.get(1),
+                                                         name: row.get(2), })
+                              .collect::<Vec<Building>>();
 
-			   Ok(bldgs)
+              Ok(bldgs)
           })
-	}
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -207,14 +199,14 @@ impl Room {
               rows.into_iter()
                   .next()
                   .map(|row: Row| {
-						let room = Room { id: row.get(0),
-											ext_id: row.get(1),
-											building_id: row.get(2),
-											code: row.get(3),
-											floor_num: row.get(4), };
-						info!(&logger, "Added meeting room: {}", room.code);
-						room
-                  })
+                           let room = Room { id: row.get(0),
+                                             ext_id: row.get(1),
+                                             building_id: row.get(2),
+                                             code: row.get(3),
+                                             floor_num: row.get(4), };
+                           info!(&logger, "Added meeting room: {}", room.code);
+                           room
+                       })
                   .ok_or_else(|| {
                       error!(logger, "Error adding room to db: No record returned.";
   							  "step"=>"add_room");
@@ -223,9 +215,8 @@ impl Room {
           })
     }
 
-	pub fn get_rooms(logger: &Logger, tx: &Transaction)
-					  -> Result<Vec<Room>, MyError> {
-		let stmt = "
+    pub fn get_rooms(logger: &Logger, tx: &Transaction) -> Result<Vec<Room>, MyError> {
+        let stmt = "
 		SELECT id, ext_id, building_id, code, floor_num 
 		  FROM testing.room;";
 
@@ -236,25 +227,23 @@ impl Room {
               MyError::DBError(DBError::PGError(err))
           })
           .and_then(|rows: Rows| {
-		       if rows.is_empty() {
-			       error!(logger, "Error querying rooms from db: \
+              if rows.is_empty() {
+                  error!(logger, "Error querying rooms from db: \
 						  No record returned."; "step"=>"get_rooms");
- 				   return Err(MyError::DBError(DBError::NoRecord))
-			   }
+                  return Err(MyError::DBError(DBError::NoRecord));
+              }
 
-			   let rooms = rows.into_iter()
- 							   .map(|row: Row|
-									Room {id: row.get(0),
-										  ext_id: row.get(1),
-									      building_id: row.get(2),
-										  code: row.get(3),
-										  floor_num: row.get(4)})
-							   .collect::<Vec<Room>>();
+              let rooms = rows.into_iter()
+                              .map(|row: Row| Room { id: row.get(0),
+                                                     ext_id: row.get(1),
+                                                     building_id: row.get(2),
+                                                     code: row.get(3),
+                                                     floor_num: row.get(4), })
+                              .collect::<Vec<Room>>();
 
-			   Ok(rooms)
+              Ok(rooms)
           })
-	}
-
+    }
 }
 
 #[derive(Debug)]
@@ -270,28 +259,27 @@ impl Meeting {
     pub fn schedule_meeting(username: String,
                             bldg_ext_id: Uuid,
                             room_code: String,
-                            start_dt: String, 
+                            start_dt: String,
                             end_dt: String,
                             title: String,
                             logger: &Logger,
                             tx: &Transaction)
                             -> Result<Meeting, MyError> {
+        let start_dt = match start_dt.parse::<DateTime<Utc>>() {
+            Ok(x) => x,
+            Err(_) => {
+                info!(logger, "Failed to convert user-provided start_dt");
+                return Err(MyError::ValueError);
+            }
+        };
 
-		let start_dt = match start_dt.parse::<DateTime<Utc>>(){
-			Ok(x) => x,
-			Err(_) => {
-				info!(logger, "Failed to convert user-provided start_dt");
-				return Err(MyError::ValueError)
-			}
-		};
-
-		let end_dt = match end_dt.parse::<DateTime<Utc>>(){
-			Ok(x) => x,
-			Err(_) => {
-				info!(logger, "Failed to convert user-provided end_dt");
-				return Err(MyError::ValueError)
-			}
-		};
+        let end_dt = match end_dt.parse::<DateTime<Utc>>() {
+            Ok(x) => x,
+            Err(_) => {
+                info!(logger, "Failed to convert user-provided end_dt");
+                return Err(MyError::ValueError);
+            }
+        };
         let time_slot: TSTZRange = range!('[' start_dt, end_dt; ']');
 
         let stmt = "
@@ -314,15 +302,14 @@ impl Meeting {
         tx.query(stmt,
                  &[&title, &time_slot, &room_code, &bldg_ext_id, &username])
           .map_err(|err| {
-			  if Some(&EXCLUSION_VIOLATION) == err.code() {
-				  info!(logger, "Meeting schedule overlap.  Could not schedule.");
-				  return MyError::MeetingError(MeetingError::ScheduleConflict)
-			  }
-			  else {
-				  error!(logger, "Failed to schedule meeting: Unknown DB Error.";
+              if Some(&EXCLUSION_VIOLATION) == err.code() {
+                  info!(logger, "Meeting schedule overlap.  Could not schedule.");
+                  return MyError::MeetingError(MeetingError::ScheduleConflict);
+              } else {
+                  error!(logger, "Failed to schedule meeting: Unknown DB Error.";
 						"step"=>"schedule_meeting", "err"=>err.to_string());
                   MyError::DBError(DBError::PGError(err))
-			  }
+              }
           })
           .and_then(|rows: Rows| {
               rows.into_iter()
@@ -345,30 +332,29 @@ impl Meeting {
           })
     }
 
-	/// Confirm what preferred timeslots are available for scheduling.
-	/// 
-	/// The point of this function is to show how to import datasets for use
-	/// within SQL.
-	pub fn check_room_availability_v1(room_cd: String,
-									  bldg_ext_id: Uuid,
-						   		      preferred_timeslots: Vec<(i64, String, String)>,
-								   	  logger: &Logger,
-								   	  tx: &Transaction)
-									  -> Result<Vec<i64>, MyError> {
-
-		let (p_ids, p_timeslots): (Vec<i64>, Vec<TSTZRange>) = 
+    /// Confirm what preferred timeslots are available for scheduling.
+    ///
+    /// The point of this function is to show how to import datasets for use
+    /// within SQL.
+    pub fn check_room_availability_v1(room_cd: String,
+                                      bldg_ext_id: Uuid,
+                                      preferred_timeslots: Vec<(i64, String, String)>,
+                                      logger: &Logger,
+                                      tx: &Transaction)
+                                      -> Result<Vec<i64>, MyError> {
+        let (p_ids, p_timeslots): (Vec<i64>, Vec<TSTZRange>) =
 			preferred_timeslots
 			.into_iter()
 			.map(|(id, start, end)| {
 				let start_dt = start.parse::<DateTime<Utc>>().unwrap(); //unsafe
 				let end_dt = end.parse::<DateTime<Utc>>().unwrap(); //unsafe
         		let time_slot: TSTZRange = range!('[' start_dt, end_dt; ']');
-				
+
 				(id, time_slot)
 			})
 			.unzip();
-		
-		let stmt = "
+
+        let stmt = "
 		SELECT pref.id 
 		  FROM unnest($1::bigint[], $2::tstzrange[]) as pref(id, time_slot)
 		 WHERE not exists (SELECT true
@@ -388,13 +374,13 @@ impl Meeting {
               MyError::DBError(DBError::PGError(err))
           })
           .and_then(|rows: Rows| {
-              let mtgs = 
-				rows.into_iter()
-					.map(|row: Row| {
-						let id: i64 = row.get(0);
-						id
-					})
-					.collect::<Vec<i64>>();
-  			  Ok(mtgs)})
-	}
+                        let mtgs = rows.into_iter()
+                                       .map(|row: Row| {
+                                                let id: i64 = row.get(0);
+                                                id
+                                            })
+                                       .collect::<Vec<i64>>();
+                        Ok(mtgs)
+                    })
+    }
 }
