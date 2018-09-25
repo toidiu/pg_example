@@ -1,5 +1,9 @@
 This project is intended to show ways to use rust-postgres and supplementary libraries.  There is little to no consistency in style across similar procedures because the intent is to show different approaches.
 
+This project is the backend of a basic conference room scheduling system.
+It can't do too much but the little it can do is pretty cool:  A user
+can schedule a room and check whether preferred timeslots are available.
+
 
 
 Step 1:  Create the database
