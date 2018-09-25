@@ -1,0 +1,5 @@
+DROP DATABASE IF EXISTS testing_db;
+
+CREATE USER test_user WITH PASSWORD 'testing';
+CREATE DATABASE testing_db OWNER test_user;
+ALTER USER test_user WITH SUPERUSER;
