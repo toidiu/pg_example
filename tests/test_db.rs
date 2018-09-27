@@ -125,7 +125,6 @@ fn test_mtg_room_availability() -> Result<(), MyError> {
                                                                preferred_timeslots,
                                                                &logger,
                                                                &tx)?;
-    println!("\n-----> {:?}", result);
     assert_eq!(true, result.len() == 1);
     assert_eq!(true, result[0] == 27);
 
