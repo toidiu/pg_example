@@ -10,6 +10,8 @@ use uuid::Uuid;
 use db::TSTZRange;
 use errors::{DBError, MeetingError, MyError};
 
+
+
 #[derive(Debug, Clone)]
 pub struct User {
     pub id: i64,
@@ -38,7 +40,7 @@ impl User {
         tx.query(stmt, &[&first_name, &last_name, &username])
           .map_err(|err| {
               error!(logger, "Failed to add user: DB Error.";
-					"step"=>"add_user", "err"=>err.to_string());
+                    "step"=>"add_user", "err"=>err.to_string());
               MyError::DBError(DBError::PGError(err))
           })
           .and_then(|rows: Rows| {
@@ -62,7 +64,8 @@ impl User {
           })
     }
 
-    pub fn get_users(logger: &Logger, tx: &Transaction) -> Result<Vec<User>, MyError> {
+    pub fn get_users(logger: &Logger, tx: &Transaction)
+                        -> Result<Vec<User>, MyError> {
         let stmt = "
 		SELECT users.id, ext_id, first_name, last_name, username
 		  FROM testing.users;";
@@ -70,13 +73,13 @@ impl User {
         tx.query(stmt, &[])
           .map_err(|err| {
               error!(logger, "Failed to query for users: DB Error.";
-					"step"=>"get_users", "err"=>err.to_string());
+                    "step"=>"get_users", "err"=>err.to_string());
               MyError::DBError(DBError::PGError(err))
           })
           .and_then(|rows: Rows| {
               if rows.is_empty() {
                   error!(logger, "Error querying users from db: \
-						  No record returned."; "step"=>"get_users");
+                        No record returned."; "step"=>"get_users");
                   return Err(MyError::DBError(DBError::NoRecord));
               }
 
@@ -87,7 +90,6 @@ impl User {
                                                      last_name: row.get(3),
                                                      username: row.get(4), })
                               .collect::<Vec<User>>();
-
               Ok(users)
           })
     }
@@ -114,7 +116,7 @@ impl Building {
 
         let result = tx.query(stmt, &[&name]).map_err(|err| {
             error!(logger, "Failed to add building: DB Error.";
-									"step"=>"add_building", "err"=>err.to_string());
+					"step"=>"add_building", "err"=>err.to_string());
             MyError::DBError(DBError::PGError(err))
         })?;
 
@@ -136,7 +138,8 @@ impl Building {
         Ok(bldg)
     }
 
-    pub fn get_buildings(logger: &Logger, tx: &Transaction) -> Result<Vec<Building>, MyError> {
+    pub fn get_buildings(logger: &Logger, tx: &Transaction)
+                         -> Result<Vec<Building>, MyError> {
         let stmt = "
 		SELECT id, ext_id, name
 		  FROM testing.building;";
@@ -159,7 +162,6 @@ impl Building {
                                                          ext_id: row.get(1),
                                                          name: row.get(2), })
                               .collect::<Vec<Building>>();
-
               Ok(bldgs)
           })
     }
@@ -199,14 +201,13 @@ impl Room {
               rows.into_iter()
                   .next()
                   .map(|row: Row| {
-                           let room = Room { id: row.get(0),
-                                             ext_id: row.get(1),
-                                             building_id: row.get(2),
-                                             code: row.get(3),
-                                             floor_num: row.get(4), };
-                           info!(&logger, "Added meeting room: {}", room.code);
-                           room
-                       })
+                    let room = Room { id: row.get(0),
+                                        ext_id: row.get(1),
+                                        building_id: row.get(2),
+                                        code: row.get(3),
+                                        floor_num: row.get(4), };
+                    info!(&logger, "Added meeting room: {}", room.code);
+                    room })
                   .ok_or_else(|| {
                       error!(logger, "Error adding room to db: No record returned.";
   							  "step"=>"add_room");
@@ -215,7 +216,8 @@ impl Room {
           })
     }
 
-    pub fn get_rooms(logger: &Logger, tx: &Transaction) -> Result<Vec<Room>, MyError> {
+    pub fn get_rooms(logger: &Logger, tx: &Transaction)
+                        -> Result<Vec<Room>, MyError> {
         let stmt = "
 		SELECT id, ext_id, building_id, code, floor_num 
 		  FROM testing.room;";
@@ -240,7 +242,6 @@ impl Room {
                                                      code: row.get(3),
                                                      floor_num: row.get(4), })
                               .collect::<Vec<Room>>();
-
               Ok(rooms)
           })
     }
@@ -374,13 +375,12 @@ impl Meeting {
               MyError::DBError(DBError::PGError(err))
           })
           .and_then(|rows: Rows| {
-                        let mtgs = rows.into_iter()
-                                       .map(|row: Row| {
-                                                let id: i64 = row.get(0);
-                                                id
-                                            })
-                                       .collect::<Vec<i64>>();
-                        Ok(mtgs)
-                    })
+            let mtgs = rows.into_iter()
+                            .map(|row: Row| {
+                                    let id: i64 = row.get(0);
+                                    id
+                                })
+                            .collect::<Vec<i64>>();
+            Ok(mtgs)})
     }
 }
